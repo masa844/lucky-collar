@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ラッキーカラー占い</title>
+  <meta name="description" content="ボタンを押すと今日のラッキーカラーを表示する、授業向けシンプルJavaScriptデモ。" />
+  <style>
+    :root {
+      --bg: #0f172a;           /* slate-900 */
+      --card: #111827;         /* gray-900 */
+      --text: #f8fafc;         /* slate-50 */
+      --muted: #cbd5e1;        /* slate-300 */
+      --accent: #60a5fa;       /* blue-400 */
+      --accent-press: #3b82f6; /* blue-500 */
+      --ring: rgba(96,165,250,0.45);
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f1f5f9;          /* slate-100 */
+        --card: #ffffff;        /* white */
+        --text: #0f172a;        /* slate-900 */
+        --muted: #475569;       /* slate-600 */
+        --accent: #2563eb;      /* blue-600 */
+        --accent-press: #1d4ed8;/* blue-700 */
+        --ring: rgba(59,130,246,0.35);
+      }
+    }
+
+    html, body {
+      height: 100%;
+    }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, sans-serif;
+      background: radial-gradient(1200px 800px at 50% -10%, rgba(99,102,241,0.15), transparent),
+                  radial-gradient(900px 600px at 120% 110%, rgba(34,197,94,0.15), transparent),
+                  var(--bg);
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      line-height: 1.55;
+    }
+
+    .wrap {
+      width: min(720px, 92vw);
+      padding: 32px 24px 28px;
+      background: var(--card);
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(22px, 3.2vw, 28px);
+      letter-spacing: 0.02em;
+    }
+    p.lead {
+      margin: 0 0 20px;
+      color: var(--muted);
+      font-size: 0.98rem;
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin: 14px 0 16px;
+    }
+
+    button {
+      appearance: none;
+      border: none;
+      border-radius: 999px;
+      padding: 12px 20px;
+      font-weight: 700;
+      font-size: 1rem;
+      background: var(--accent);
+      color: #fff;
+      cursor: pointer;
+      transition: transform .06s ease, box-shadow .2s ease, background .12s ease;
+      box-shadow: 0 6px 16px rgba(37,99,235,0.35);
+      outline: none;
+    }
+    button:active { transform: translateY(1px); background: var(--accent-press); }
+    button:focus-visible { box-shadow: 0 0 0 4px var(--ring); }
+
+    .result {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-top: 12px;
+    }
+
+    .swatch {
+      border-radius: 16px;
+      min-height: 140px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 16px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);
+      border: 1px solid rgba(0,0,0,0.08);
+    }
+
+    .name {
+      font-size: clamp(20px, 4vw, 26px);
+      font-weight: 800;
+      letter-spacing: 0.04em;
+    }
+    .hex {
+      margin-top: 4px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      opacity: .85;
+      background: rgba(0,0,0,0.12);
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+
+    .note { color: var(--muted); font-size: .9rem; margin-top: 8px; }
+    footer { margin-top: 18px; color: var(--muted); font-size: .85rem; }
+
+    .palette {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 10px;
+      margin-top: 18px;
+    }
+    .chip {
+      display: grid;
+      grid-template-columns: 20px 1fr;
+      align-items: center;
+      gap: 10px;
+      background: rgba(0,0,0,0.15);
+      border-radius: 12px;
+      padding: 8px 10px;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    @media (prefers-color-scheme: light) {
+      .chip { background: rgba(0,0,0,0.05); }
+      .hex { background: rgba(0,0,0,0.06); }
+    }
+    .chip .dot {
+      width: 20px; height: 20px; border-radius: 50%;
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.15) inset;
+    }
+    .chip .label { font-size: .92rem; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h1>ラッキーカラー占い 🎨</h1>
+    <p class="lead">ボタンを押すと、12色の中からランダムに「ラッキーカラー」をひとつ表示します。授業でのデモ用に、<strong>DOM操作</strong>と<strong>乱数</strong>の基本が分かる構成です。</p>
+
+    <div class="controls">
+      <button id="pick" type="button" aria-describedby="hint">ラッキーカラーを占う</button>
+      <span id="hint" class="note">※クリックやEnterキーでも実行できます</span>
+    </div>
+
+    <section class="result" aria-live="polite" aria-atomic="true">
+      <div id="swatch" class="swatch" style="background:#0ea5e9; color:#fff">
+        <div>
+          <div class="name" id="colorName">シアン（例）</div>
+          <div class="hex" id="colorHex">#0EA5E9</div>
+        </div>
+      </div>
+      <div class="note">結果はその都度ランダムです。視認性のため、背景色に合わせて文字色を自動調整しています。</div>
+      <div class="palette" id="palette" aria-hidden="true"></div>
+    </section>
+
+    <footer>
+      <span>© 2025 Lucky Color Demo</span>
+    </footer>
+  </main>
+
+  <script>
+    // 12色の定義（日本語名 + HEX）
+    const COLORS = [
+      { name: '赤',   hex: '#E53935' },
+      { name: '橙',   hex: '#FB8C00' },
+      { name: '黄',   hex: '#FDD835' },
+      { name: '黄緑', hex: '#7CB342' },
+      { name: '緑',   hex: '#2E7D32' },
+      { name: '青',   hex: '#1E88E5' },
+      { name: '藍',   hex: '#3949AB' },
+      { name: '紫',   hex: '#8E24AA' },
+      { name: '桃',   hex: '#EC407A' },
+      { name: '茶',   hex: '#8D6E63' },
+      { name: '白',   hex: '#FFFFFF' },
+      { name: '黒',   hex: '#1F2937' }
+    ];
+
+    // 初期パレットの描画（教材として、配列→DOM生成の例）
+    const palette = document.getElementById('palette');
+    COLORS.forEach(c => {
+      const chip = document.createElement('div');
+      chip.className = 'chip';
+      const dot = document.createElement('span');
+      dot.className = 'dot';
+      dot.style.background = c.hex;
+      const label = document.createElement('span');
+      label.className = 'label';
+      label.textContent = `${c.name}  ${c.hex.toUpperCase()}`;
+      chip.append(dot, label);
+      palette.appendChild(chip);
+    });
+
+    // 要素の参照
+    const btn = document.getElementById('pick');
+    const swatch = document.getElementById('swatch');
+    const colorName = document.getElementById('colorName');
+    const colorHex = document.getElementById('colorHex');
+
+    // クリックで色を選ぶ
+    btn.addEventListener('click', () => {
+      const index = Math.floor(Math.random() * COLORS.length);
+      const { name, hex } = COLORS[index];
+      updateResult(name, hex);
+    });
+
+    // Enterキーでも発火（アクセシビリティ配慮）
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        btn.click();
+      }
+    });
+
+    // 文字色の自動調整（相対輝度ベース）
+    function idealTextColor(bgHex) {
+      const { r, g, b } = hexToRgb(bgHex);
+      // sRGB → 線形化
+      const srgb = [r, g, b].map(v => v / 255).map(u => u <= 0.03928 ? u / 12.92 : Math.pow((u + 0.055) / 1.055, 2.4));
+      const L = 0.2126 * srgb[0] + 0.7152 * srgb[1] + 0.0722 * srgb[2]; // 相対輝度
+      return L > 0.6 ? '#111827' : '#FFFFFF';
+    }
+
+    function hexToRgb(hex) {
+      const h = hex.replace('#', '');
+      const bigint = parseInt(h.length === 3 ? h.split('').map(ch => ch + ch).join('') : h, 16);
+      return { r: (bigint >> 16) & 255, g: (bigint >> 8) & 255, b: bigint & 255 };
+    }
+
+    function updateResult(name, hex) {
+      const textColor = idealTextColor(hex);
+      swatch.style.background = hex;
+      swatch.style.color = textColor;
+      colorName.textContent = name;
+      colorHex.textContent = hex.toUpperCase();
+      // 視覚効果（小さなポップ）
+      swatch.animate([
+        { transform: 'scale(1)' },
+        { transform: 'scale(1.02)' },
+        { transform: 'scale(1)' }
+      ], { duration: 200, easing: 'ease-out' });
+    }
+
+    // デモ初期化：最初に一回実行
+    updateResult('シアン（例）', '#0EA5E9');
+  </script>
+</body>
+</html>
