@@ -96,11 +96,11 @@
 
     .swatch {
       border-radius: 16px;
-      min-height: 140px;
+      min-height: 160px;
       display: grid;
       place-items: center;
       text-align: center;
-      padding: 16px;
+      padding: 18px;
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);
       border: 1px solid rgba(0,0,0,0.08);
     }
@@ -111,12 +111,20 @@
       letter-spacing: 0.04em;
     }
     .hex {
+      display: inline-block;
       margin-top: 4px;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       opacity: .85;
       background: rgba(0,0,0,0.12);
       padding: 4px 10px;
       border-radius: 999px;
+    }
+    .message {
+      max-width: 520px;
+      margin: 12px auto 0;
+      font-size: 0.98rem;
+      font-weight: 600;
+      opacity: .92;
     }
 
     .note { color: var(--muted); font-size: .9rem; margin-top: 8px; }
@@ -164,6 +172,7 @@
         <div>
           <div class="name" id="colorName">シアン（例）</div>
           <div class="hex" id="colorHex">#0EA5E9</div>
+          <div class="message" id="colorMessage">今日は視野を広げて、新しいアイデアを試してみるのに向いている日です。</div>
         </div>
       </div>
       <div class="note">結果はその都度ランダムです。視認性のため、背景色に合わせて文字色を自動調整しています。</div>
@@ -176,20 +185,20 @@
   </main>
 
   <script>
-    // 12色の定義（日本語名 + HEX）
+    // 12色の定義（日本語名 + HEX + メッセージ）
     const COLORS = [
-      { name: '赤',   hex: '#E53935' },
-      { name: '橙',   hex: '#FB8C00' },
-      { name: '黄',   hex: '#FDD835' },
-      { name: '黄緑', hex: '#7CB342' },
-      { name: '緑',   hex: '#2E7D32' },
-      { name: '青',   hex: '#1E88E5' },
-      { name: '藍',   hex: '#3949AB' },
-      { name: '紫',   hex: '#8E24AA' },
-      { name: '桃',   hex: '#EC407A' },
-      { name: '茶',   hex: '#8D6E63' },
-      { name: '白',   hex: '#FFFFFF' },
-      { name: '黒',   hex: '#1F2937' }
+      { name: '赤',   hex: '#E53935', message: '行動力が高まりそうな日です。まずは小さな一歩から始めてみましょう。' },
+      { name: '橙',   hex: '#FB8C00', message: '人との会話にツキがありそうです。明るい挨拶がよい流れを作ります。' },
+      { name: '黄',   hex: '#FDD835', message: 'ひらめきが生まれやすい日です。思いついたことはメモに残しておきましょう。' },
+      { name: '黄緑', hex: '#7CB342', message: '新しいことを吸収しやすい日です。少しだけ学びの時間を取るとよさそうです。' },
+      { name: '緑',   hex: '#2E7D32', message: '落ち着いて整える力が出やすい日です。身の回りを少し整えると気分も整います。' },
+      { name: '青',   hex: '#1E88E5', message: '集中力を発揮しやすい日です。大事な作業を一つ選んで取り組んでみましょう。' },
+      { name: '藍',   hex: '#3949AB', message: '深く考えるのに向いている日です。急がず、筋道を立てて判断しましょう。' },
+      { name: '紫',   hex: '#8E24AA', message: '感性が働きやすい日です。いつもと違う見方をすると発見がありそうです。' },
+      { name: '桃',   hex: '#EC407A', message: 'やわらかい気持ちで過ごせそうな日です。自分にも人にも少し優しくしてみましょう。' },
+      { name: '茶',   hex: '#8D6E63', message: '地に足をつけて進める日です。基本を確認すると安心して前に進めます。' },
+      { name: '白',   hex: '#FFFFFF', message: '気持ちを切り替えるのに向いている日です。余白を作ると新しい流れが入ってきます。' },
+      { name: '黒',   hex: '#1F2937', message: '静かに力をためる日です。無理に広げず、大事なことを絞り込みましょう。' }
     ];
 
     // 初期パレットの描画（教材として、配列→DOM生成の例）
@@ -212,12 +221,13 @@
     const swatch = document.getElementById('swatch');
     const colorName = document.getElementById('colorName');
     const colorHex = document.getElementById('colorHex');
+    const colorMessage = document.getElementById('colorMessage');
 
     // クリックで色を選ぶ
     btn.addEventListener('click', () => {
       const index = Math.floor(Math.random() * COLORS.length);
-      const { name, hex } = COLORS[index];
-      updateResult(name, hex);
+      const { name, hex, message } = COLORS[index];
+      updateResult(name, hex, message);
     });
 
     // Enterキーでも発火（アクセシビリティ配慮）
@@ -242,12 +252,13 @@
       return { r: (bigint >> 16) & 255, g: (bigint >> 8) & 255, b: bigint & 255 };
     }
 
-    function updateResult(name, hex) {
+    function updateResult(name, hex, message) {
       const textColor = idealTextColor(hex);
       swatch.style.background = hex;
       swatch.style.color = textColor;
       colorName.textContent = name;
       colorHex.textContent = hex.toUpperCase();
+      colorMessage.textContent = message;
       // 視覚効果（小さなポップ）
       swatch.animate([
         { transform: 'scale(1)' },
@@ -257,7 +268,7 @@
     }
 
     // デモ初期化：最初に一回実行
-    updateResult('シアン（例）', '#0EA5E9');
+    updateResult('シアン（例）', '#0EA5E9', '今日は視野を広げて、新しいアイデアを試してみるのに向いている日です。');
   </script>
 </body>
 </html>
